@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header><h1>Admin Panel</h1><a href="/">Home</a></header>
+  <main class="grid">
+    <div class="card">
+      <h3>Platform Metrics</h3>
+      <pre id="metrics"></pre>
+    </div>
+    <div class="card">
+      <h3>Create Lesson</h3>
+      <input id="title" placeholder="Lesson title" />
+      <textarea id="description" placeholder="Description"></textarea>
+      <select id="difficulty">
+        <option>Beginner</option>
+        <option>Intermediate</option>
+        <option>Advanced</option>
+      </select>
+      <label><input id="premium" type="checkbox" /> Premium lesson</label>
+      <button id="createLesson">Create</button>
+      <p id="lessonStatus"></p>
+    </div>
+    <div class="card">
+      <h3>Premium Subscription Control</h3>
+      <label>Student ID</label><input id="studentId" type="number" value="1" />
+      <label>Plan Name</label><input id="planName" value="Pro Monthly" />
+      <label><input id="isActive" type="checkbox" checked /> Active</label>
+      <button id="updatePremium">Update Premium</button>
+      <p id="premiumStatus"></p>
+    </div>
+  </main>
+  <script src="/static/js/common.js"></script>
+  <script>
+    async function loadMetrics() {
+      const data = await apiGet('/admin/overview');
+      metrics.textContent = JSON.stringify(data, null, 2);
+    }
+
+    createLesson.onclick = async () => {
+      const result = await apiPost('/lessons', {
+        title: title.value,
+        description: description.value,
+        difficulty: difficulty.value,
+        is_premium: premium.checked,
+      });
+      lessonStatus.textContent = `Created lesson #${result.id}`;
+      loadMetrics();
+    };
+
+    updatePremium.onclick = async () => {
+      await apiPost('/premium/update', {
+        student_id: Number(studentId.value),
+        active: isActive.checked,
+        plan_name: planName.value,
+      });
+      premiumStatus.textContent = 'Premium updated successfully';
+    };
+
+    loadMetrics();
+  </script>
+</body>
+</html>
