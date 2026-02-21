@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parent Panel</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header><h1>Parent Panel</h1><a href="/">Home</a></header>
+  <main>
+    <div class="card">
+      <h3>Student Progress Overview</h3>
+      <p id="parentName"></p>
+      <table class="table" id="parentTable"></table>
+    </div>
+  </main>
+  <script src="/static/js/common.js"></script>
+  <script>
+    async function loadParent() {
+      const data = await apiGet('/parents/2/overview');
+      parentName.textContent = `Logged in as ${data.parent.name}`;
+      parentTable.innerHTML = '<tr><th>Student</th><th>Average Progress</th><th>Average Score</th></tr>' +
+        data.students.map(s => `<tr><td>${s.student_name}</td><td>${s.avg_progress}%</td><td>${s.avg_score}</td></tr>`).join('');
+    }
+    loadParent();
+  </script>
+</body>
+</html>

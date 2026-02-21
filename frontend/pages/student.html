@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Panel</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header><h1>Student Panel</h1><a href="/">Home</a></header>
+  <main>
+    <div class="grid">
+      <div class="card">
+        <h3>Dashboard</h3>
+        <div id="studentInfo"></div>
+        <div id="premiumInfo"></div>
+      </div>
+      <div class="card">
+        <h3>Simulation Engine</h3>
+        <label>Scenario</label>
+        <input id="scenario" value="Practice robotics challenge" />
+        <label>Current Score</label>
+        <input id="inputScore" type="number" min="0" max="100" value="70" />
+        <button id="runSim">Run Simulation</button>
+        <p id="simResult"></p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>Lessons (Premium + Free)</h3>
+      <table class="table" id="lessonTable"></table>
+    </div>
+  </main>
+  <script src="/static/js/common.js"></script>
+  <script>
+    const studentId = 1;
+
+    function lessonRow(l) {
+      return `<tr><td>${l.title}</td><td>${l.difficulty}</td><td>${l.is_premium ? 'Premium' : 'Free'}</td><td>${l.progress}%</td><td>${l.score}</td></tr>`;
+    }
+
+    async function loadStudent() {
+      const data = await apiGet(`/students/${studentId}/dashboard`);
+      studentInfo.innerHTML = `<p><strong>${data.student.name}</strong><br>${data.student.email}</p>`;
+      premiumInfo.innerHTML = `<p>Plan: ${data.premium.plan_name || 'None'} | Active: ${data.premium.active ? 'Yes' : 'No'}</p>`;
+      lessonTable.innerHTML = '<tr><th>Lesson</th><th>Difficulty</th><th>Tier</th><th>Progress</th><th>Score</th></tr>' + data.lessons.map(lessonRow).join('');
+    }
+
+    runSim.onclick = async () => {
+      const result = await apiPost('/simulation/run', {
+        student_id: studentId,
+        scenario: scenario.value,
+        input_score: Number(inputScore.value),
+      });
+      simResult.textContent = `Predicted Score: ${result.simulated_score}. ${result.feedback}`;
+    };
+
+    loadStudent();
+  </script>
+</body>
+</html>
